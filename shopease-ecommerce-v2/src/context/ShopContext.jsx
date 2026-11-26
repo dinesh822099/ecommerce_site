@@ -1,0 +1,7 @@
+import {createContext,useContext} from 'react'; import useLocalStorage from '../hooks/useLocalStorage';
+const ShopContext=createContext(null);
+export function ShopProvider({children}){const [cart,setCart]=useLocalStorage('shopease-cart',[]);const [wishlist,setWishlist]=useLocalStorage('shopease-wishlist',[]);const [user,setUser]=useLocalStorage('shopease-user',null);const [lastOrder,setLastOrder]=useLocalStorage('shopease-order',null);
+const addToCart=p=>setCart(old=>{const found=old.find(x=>x.id===p.id);return found?old.map(x=>x.id===p.id?{...x,quantity:x.quantity+1}:x):[...old,{...p,quantity:1}];});
+const removeFromCart=id=>setCart(old=>old.filter(x=>x.id!==id));const updateQuantity=(id,q)=>{if(q>0)setCart(old=>old.map(x=>x.id===id?{...x,quantity:q}:x));};const toggleWishlist=p=>setWishlist(old=>old.some(x=>x.id===p.id)?old.filter(x=>x.id!==p.id):[...old,p]);const cartCount=cart.reduce((s,x)=>s+x.quantity,0);const total=cart.reduce((s,x)=>s+x.price*x.quantity,0);
+return <ShopContext.Provider value={{cart,setCart,wishlist,user,setUser,lastOrder,setLastOrder,addToCart,removeFromCart,updateQuantity,toggleWishlist,cartCount,total}}>{children}</ShopContext.Provider>;}
+export function useShop(){const value=useContext(ShopContext);if(!value)throw new Error('useShop must be inside ShopProvider');return value;}
